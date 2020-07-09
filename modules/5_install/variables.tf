@@ -48,6 +48,7 @@ variable worker_macs {}
 variable "openshift_client_tarball" {}
 variable "openshift_install_tarball" {}
 
+variable "service_network" {}
 variable "public_key" {}
 variable "pull_secret" {}
 variable "release_image_override" {}

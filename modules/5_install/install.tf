@@ -64,6 +64,7 @@ locals {
     install_vars = {
         cluster_id              = var.cluster_id
         cluster_domain          = var.cluster_domain
+        service_network         = var.service_network
         pull_secret             = var.pull_secret
         public_ssh_key          = var.public_key
         storage_type            = var.storage_type

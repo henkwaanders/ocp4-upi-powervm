@@ -115,4 +115,5 @@ module "install" {
     upgrade_image                   = var.upgrade_image
     upgrade_pause_time              = var.upgrade_pause_time
     upgrade_delay_time              = var.upgrade_delay_time
+    service_network                 = var.service_network
 }

@@ -2,7 +2,7 @@
 auth_url                    = "https://<HOSTNAME>:5000/v3/"
 user_name                   = ""
 password                    = ""
-tenant_name                 = "tenant_name"
+tenant_name                 = "ibm-default"
 domain_name                 = "Default"
 openstack_availability_zone = ""
 
@@ -21,7 +21,7 @@ rhel_subscription_password  = ""
 rhcos_kernel_options        = []
 bastion                     = {instance_type    = "medium", image_id     = "daa5d3f4-ab66-4b2d-9f3d-77bd61774419"}
 bootstrap                   = {instance_type    = "medium", image_id     = "468863e6-4b33-4e8b-b2c5-c9ef9e6eedf4",  "count"   = 1}
-master                      = {instance_type    = "medium",  image_id     = "468863e6-4b33-4e8b-b2c5-c9ef9e6eedf4",  "count"   = 3}
+master                      = {instance_type    = "medium", image_id     = "468863e6-4b33-4e8b-b2c5-c9ef9e6eedf4",  "count"   = 3}
 worker                      = {instance_type    = "large",  image_id     = "468863e6-4b33-4e8b-b2c5-c9ef9e6eedf4",  "count"   = 2}
 
 
@@ -34,14 +34,15 @@ openshift_client_tarball    = "https://mirror.openshift.com/pub/openshift-v4/ppc
 pull_secret_file = "data/pull-secret.txt"
 cluster_domain = "example.com"
 cluster_id_prefix = "test"
+service_network = "172.20.0.0./16"
 
 dns_forwarders      = "8.8.8.8; 8.8.4.4"
 mount_etcd_ramdisk  = false
 installer_log_level = "info"
 ansible_extra_options = "-v"
 
-#helpernode_tag = "fddbbc651153ef2966e5cb4d4167990b31c01ceb"
-install_playbook_tag = "fd018e391831d431a0828b58c7b25f7c5b0bb581"
+helpernode_tag = "master"
+install_playbook_tag = "master"
 
 storage_type    = "nfs"
 volume_size = "300" # Value in GB

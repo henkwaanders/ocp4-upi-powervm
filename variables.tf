@@ -221,6 +221,10 @@ variable "cluster_id_prefix" {
     default   = "test-ocp"
 }
 
+variable "service_network" {
+    default   = "172.30.0.0/16"
+}
+
 variable "dns_forwarders" {
     default   = "8.8.8.8; 8.8.4.4"
 }
