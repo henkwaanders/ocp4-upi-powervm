@@ -149,6 +149,8 @@ variable "rhel_subscription_username" {}
 
 variable "rhel_subscription_password" {}
 
+variable "ansible_repo" {}
+
 variable "rhcos_kernel_options" {
     description = "List of kernel arguments for the cluster nodes"
     default     = []
@@ -167,16 +169,26 @@ variable "installer_log_level" {
     default = "info"
 }
 
+variable "helpernode_repo" {
+    description = "Set the ocp4-helpernode url"
+    default = "https://github.com/RedHatOfficial/ocp4-helpernode"
+}
+
 variable "helpernode_tag" {
     description = "Set the branch/tag name or commit# for using ocp4-helpernode repo"
     # Checkout level for https://github.com/RedHatOfficial/ocp4-helpernode which is used for setting up services required on bastion node
-    default = "fddbbc651153ef2966e5cb4d4167990b31c01ceb"
+    default = "master"
+}
+
+variable "install_playbook_repo" {
+    description = "Set ocp4-playbooks url"
+    default = "https://github.com/ocp-power-automation/ocp4-playbooks"
 }
 
 variable "install_playbook_tag" {
     description = "Set the branch/tag name or commit# for using ocp4-playbooks repo"
     # Checkout level for https://github.com/ocp-power-automation/ocp4-playbooks which is used for running ocp4 installations steps
-    default = "fd018e391831d431a0828b58c7b25f7c5b0bb581"
+    default = "master"
 }
 
 variable "ansible_extra_options" {
@@ -202,6 +214,18 @@ variable "openshift_install_tarball" {
 
 variable "openshift_client_tarball" {
      default = "https://mirror.openshift.com/pub/openshift-v4/ppc64le/clients/ocp/stable-4.4/openshift-client-linux.tar.gz"
+}
+
+variable "raw_image" {
+     default = "https://mirror.openshift.com/pub/openshift-v4/ppc64le/dependencies/rhcos/4.4/latest/rhcos-4.4.9-ppc64le-metal.ppc64le.raw.gz"
+}
+
+variable "kernel_image" {
+     default = "https://mirror.openshift.com/pub/openshift-v4/ppc64le/dependencies/rhcos/4.4/latest/rhcos-4.4.9-ppc64le-installer-kernel-ppc64le"
+}
+
+variable "initramfs_image" {
+     default = "https://mirror.openshift.com/pub/openshift-v4/ppc64le/dependencies/rhcos/4.4/latest/rhcos-4.4.9-ppc64le-installer-initramfs.ppc64le.img"
 }
 
 variable "release_image_override" {

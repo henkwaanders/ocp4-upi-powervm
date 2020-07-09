@@ -118,11 +118,16 @@ resource "null_resource" "bastion_init" {
             "sudo yum install -y wget jq git net-tools vim python3 tar"
         ]
     }
+
+# On RHEL 8 don't install ansible using pip but from the ansible repo
     provisioner "remote-exec" {
         inline = [
-            "sudo pip3 install ansible -q"
+            "#sudo pip3 install ansible -q"
+            "sudo subscription-manager repos --enable ${var.ansible_repo}"
+            "sudo yum install -y ansible"
         ]
     }
+
     provisioner "remote-exec" {
         inline = [
             "sudo systemctl unmask NetworkManager",
