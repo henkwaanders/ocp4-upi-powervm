@@ -122,8 +122,8 @@ resource "null_resource" "bastion_init" {
 # On RHEL 8 don't install ansible using pip but from the ansible repo
     provisioner "remote-exec" {
         inline = [
-            "#sudo pip3 install ansible -q"
-            "sudo subscription-manager repos --enable ${var.ansible_repo}"
+            "#sudo pip3 install ansible -q",
+            "sudo subscription-manager repos --enable ${var.ansible_repo}",
             "sudo yum install -y ansible"
         ]
     }
