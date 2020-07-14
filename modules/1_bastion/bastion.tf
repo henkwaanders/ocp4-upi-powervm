@@ -142,6 +142,13 @@ resource "null_resource" "bastion_init" {
             "sudo rm -rf /tmp/terraform_*"
         ]
     }
+
+# We don't need that many threads on the bastion node
+    provisioner "remote-exec" {
+        inline = [
+            "sudo ppc64_cpu --smt=2"
+        ]
+    }
 }
 
 resource "openstack_blockstorage_volume_v2" "storage_volume" {
