@@ -108,6 +108,12 @@ resource "null_resource" "bastion_init" {
             "echo 'vm.max_map_count = 262144' | sudo tee --append /etc/sysctl.conf > /dev/null",
         ]
     }
+# We don't need that many threads on the bastion node
+    provisioner "remote-exec" {
+        inline = [
+            "sudo ppc64_cpu --smt=2"
+        ]
+    }
     provisioner "remote-exec" {
         inline = [
             "sudo subscription-manager clean",
@@ -144,12 +150,6 @@ resource "null_resource" "bastion_init" {
         ]
     }
 
-# We don't need that many threads on the bastion node
-    provisioner "remote-exec" {
-        inline = [
-            "sudo ppc64_cpu --smt=2"
-        ]
-    }
 }
 
 resource "openstack_blockstorage_volume_v2" "storage_volume" {
