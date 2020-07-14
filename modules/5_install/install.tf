@@ -141,6 +141,10 @@ resource "null_resource" "install" {
         content     = templatefile("${path.module}/templates/install_vars.yaml", local.install_vars)
         destination = "~/ocp4-playbooks/install_vars.yaml"
     }
+    provisioner "file" {
+        content     = "data/htpasswd"
+        destination = "~/ocp4-playbooks/htpasswd"
+    }
     provisioner "remote-exec" {
         inline = [
             "echo 'Running ocp install playbook...'",
