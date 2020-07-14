@@ -137,6 +137,7 @@ resource "null_resource" "bastion_init" {
             "sudo systemctl enable NetworkManager"
         ]
     }
+    
     provisioner "remote-exec" {
         inline = [
             "sudo rm -rf /tmp/terraform_*"
