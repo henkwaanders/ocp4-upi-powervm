@@ -143,7 +143,7 @@ resource "null_resource" "install" {
     }
     provisioner "file" {
         content     = "data/htpasswd"
-        destination = "~/openstack-upi/htpasswd"
+        destination = "~/ocp4-playbooks/htpasswd"
     }
     provisioner "remote-exec" {
         inline = [
