@@ -142,7 +142,7 @@ resource "null_resource" "install" {
         destination = "~/ocp4-playbooks/install_vars.yaml"
     }
     provisioner "file" {
-        content     = "data/htpasswd"
+        source      = "data/htpasswd"
         destination = "~/ocp4-playbooks/htpasswd"
     }
     provisioner "remote-exec" {
