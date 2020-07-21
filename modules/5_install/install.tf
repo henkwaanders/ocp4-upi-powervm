@@ -177,3 +177,36 @@ resource "null_resource" "upgrade" {
     }
 }
 
+resource "null_resource" "tuning" {
+    depends_on = [null_resource.upgrade]
+
+    connection {
+        type        = "ssh"
+        user        = var.rhel_username
+        host        = var.bastion_ip
+        private_key = var.private_key
+        agent       = var.ssh_agent
+        timeout     = "15m"
+    }
+
+    provisioner "file" {
+        source      = "${path.module}/templates/42-cp4d.yaml"
+        destination = "~/openstack-upi/42-cp4d.yaml"
+    }
+
+    provisioner "file" {
+        source      = "${path.module}/templates/crio.conf"
+        destination = "~/openstack-upi/crio.conf"
+    }
+
+    provisioner "file" {
+        source      = "${path.module}/templates/smt.yaml"
+        destination = "~/openstack-upi/smt.yaml"
+    }
+
+    provisioner "remote-exec" {
+        inline = [
+            "echo 'Apply the tune operators using the instruction on the doc page.'"
+        ]
+    }
+}
