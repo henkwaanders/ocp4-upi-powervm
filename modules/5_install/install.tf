@@ -190,13 +190,23 @@ resource "null_resource" "tuning" {
     }
 
     provisioner "file" {
-        source      = "${path.module}/templates/42-cp4d.yaml"
-        destination = "~/openstack-upi/42-cp4d.yaml"
+        source      = "${path.module}/templates/crio-ppc64le.conf"
+        destination = "~/openstack-upi/crio.conf"
     }
 
     provisioner "file" {
-        source      = "${path.module}/templates/crio.conf"
-        destination = "~/openstack-upi/crio.conf"
+        source      = "${path.module}/templates/update_crio.sh"
+        destination = "~/openstack-upi/update_crio.sh"
+    }
+
+    provisioner "remote-exec" {
+        inline = [
+            "sudo chmod +x ~/openstack-upi/update_crio.sh
+        ]
+    }
+    provisioner "file" {
+        source      = "${path.module}/templates/42-cp4d-ppc64le.yaml"
+        destination = "~/openstack-upi/42-cp4d-ppc64le.yaml"
     }
 
     provisioner "file" {
