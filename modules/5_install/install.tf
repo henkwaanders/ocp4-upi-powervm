@@ -201,7 +201,7 @@ resource "null_resource" "tuning" {
 
     provisioner "remote-exec" {
         inline = [
-            "sudo chmod +x ~/openstack-upi/update_crio.sh
+            "sudo chmod +x ~/openstack-upi/update_crio.sh"
         ]
     }
     provisioner "file" {
@@ -216,7 +216,7 @@ resource "null_resource" "tuning" {
 
     provisioner "remote-exec" {
         inline = [
-            "echo 'Apply the tune operators using the instruction on the doc page.'"
+            "echo 'Apply the tune operators using the instructions on the doc page.'"
         ]
     }
 }
