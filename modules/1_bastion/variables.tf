@@ -32,6 +32,7 @@ variable "bastion" {
     }
 }
 variable "network_name" {}
+variable "network_type"
 variable "scg_id" {}
 variable "openstack_availability_zone" {}
 
