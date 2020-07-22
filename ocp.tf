@@ -39,6 +39,7 @@ module "bastion" {
     cluster_id                      = "${random_id.label.hex}"
     bastion                         = var.bastion
     network_name                    = var.network_name
+    network_type                    = var.network_type
     scg_id                          = var.scg_id
     openstack_availability_zone     = var.openstack_availability_zone
     rhel_username                   = var.rhel_username

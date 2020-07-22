@@ -29,6 +29,39 @@ resource "random_id" "label" {
     byte_length = "2"
 }
 
+data "openstack_networking_network_v2" "network" {
+    name        = var.network_name
+}
+
+data "openstack_networking_subnet_v2" "subnet" {
+    network_id  = data.openstack_networking_network_v2.network.id
+}
+
+resource "openstack_networking_port_v2" "bastion_port" {
+    name = "${var.cluster_id}-bastion-port"
+    network_id  = data.openstack_networking_network_v2.network.id
+    admin_state_up = "true"
+    binding {
+       vnic_type = var.network_type == "SRIOV" ?  "direct" : "normal"
+       profile   = var.network_type == "SRIOV" ?  local.sriov : null
+     }
+    extra_dhcp_option {
+        name  = "domain-search"
+        value = var.cluster_domain
+    }
+}
+
+locals {
+   sriov   = <<EOF
+   {
+       "delete_with_instance": 1,
+       "vnic_required_vfs": 1,
+       "capacity": 0.02,
+       "vlan_type": "allowed"
+   }
+   EOF
+}
+
 resource "openstack_compute_flavor_v2" "bastion_scg" {
     count       = var.scg_id == "" ? 0 : 1
     name        = "${var.bastion["instance_type"]}-${random_id.label[0].hex}-scg"
@@ -55,6 +88,9 @@ resource "openstack_compute_instance_v2" "bastion" {
         name    = var.network_name
     }
     availability_zone = var.openstack_availability_zone
+    network {
+        port = openstack_networking_port_v2.bastion_port.id
+    }
 
     provisioner "remote-exec" {
         connection {
