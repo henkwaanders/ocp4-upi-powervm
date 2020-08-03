@@ -51,4 +51,4 @@ variable "storage_type" {}
 variable "volume_size" {}
 variable "volume_storage_template" {}
 
-variable proxy {}
+variable "proxy" {}
