@@ -209,7 +209,7 @@ resource "null_resource" "upgrade" {
 }
 
 resource "null_resource" "tuning" {
-    depends_on = [null_resource.upgrade]
+    depends_on = [null_resource.install]
 
     connection {
         type        = "ssh"
