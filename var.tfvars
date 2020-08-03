@@ -19,7 +19,6 @@ public_key                  = ""
 rhel_subscription_username  = ""
 rhel_subscription_password  = ""
 ansible_repo                = "ansible-2.9-for-rhel-8-ppc64le-rpms"
-rhcos_kernel_options        = []
 bastion                     = {instance_type    = "medium", image_id     = "daa5d3f4-ab66-4b2d-9f3d-77bd61774419"}
 bootstrap                   = {instance_type    = "medium", image_id     = "468863e6-4b33-4e8b-b2c5-c9ef9e6eedf4",  "count"   = 1}
 master                      = {instance_type    = "medium", image_id     = "468863e6-4b33-4e8b-b2c5-c9ef9e6eedf4",  "count"   = 3}
