@@ -59,15 +59,14 @@ Update the following variables specific to your cluster requirement. All the var
 
 Update the following variables specific to the nodes.
 
- * `rhel_subscription_username` : (Required) The username required for RHEL subscription on bastion host.
- * `rhel_subscription_password` : (Required) The password required for RHEL subscription on bastion host.
+ * `rhel_subscription_username` : (Optional) The username required for RHEL subscription on bastion host. Leave empty if repos are already setup in the RHEL image and subscription is not needed.
+ * `rhel_subscription_password` : (Optional) The password required for RHEL subscription on bastion host.
  * `rhel_username` : (Optional) The user that we should use for the connection to the bastion host. The default value is set as "root user.
  * `keypair_name` : (Optional) Value for keypair used. Default is <cluster_id>-keypair.
  * `public_key_file` : (Optional) A pregenerated OpenSSH-formatted public key file. Default path is 'data/id_rsa.pub'.
  * `private_key_file` : (Optional) Corresponding private key file. Default path is 'data/id_rsa'.
  * `private_key` : (Optional) The contents of an SSH key to use for the connection. Ignored if `public_key_file` is provided.
  * `public_key` : (Optional) The contents of corresponding key to use for the connection. Ignored if `public_key_file` is provided.
- * `rhcos_kernel_options` : (Optional) List of [kernel arguments](https://docs.openshift.com/container-platform/4.4/nodes/nodes/nodes-nodes-working.html#nodes-nodes-kernel-arguments_nodes-nodes-working) for the cluster nodes eg: ["slub_max_order=0","loglevel=7"]. Note that this will be applied after the cluster is installed, hence wait till all the nodes are in `Ready` status before you start using the cluster. Check nodes status using the command `oc get nodes`.
 
 ### Setup OpenShift Variables
 
@@ -76,8 +75,12 @@ Update the following variables specific to OCP.
  * `openshift_install_tarball` : (Required) HTTP URL for OpenShift install tarball.
  * `openshift_client_tarball` : (Required) HTTP URL for OpenShift client (`oc`) tarball.
  * `cluster_domain` : (Required) Cluster domain name. `<cluster_id>.<cluster_domain>` forms the fully qualified domain name.
- * `cluster_id_prefix` : (Required) Cluster identifier. Should not be more than 8 characters. Nodes are pre-fixed with this value, please keep it unique.
- * `release_image_override` : (Optional) This is set to OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE while creating ignition files.
+ * `cluster_id_prefix` : (Required) Cluster identifier prefix. Should not be more than 8 characters. Nodes are pre-fixed with this value, please keep it unique.
+ * `cluster_id` : (Optional) Cluster identifier, when not set random value will be used. Length cannot exceed 14 characters when combined with cluster_id_prefix.
+ * `release_image_override` : (Optional) This is set to OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE while creating ignition files. Not applicable when using local registry setup.
+
+### Setup Additonal OpenShift Variables
+
  * `installer_log_level` : (Optional) Log level for OpenShift install (e.g. "debug | info | warn | error") (default "info")
  * `ansible_extra_options` : (Optional) Ansible options to append to the ansible-playbook commands. Default is set to "-v".
  * `helpernode_tag` : (Optional) [ocp4-helpernode](https://github.com/RedHatOfficial/ocp4-helpernode) ansible playbook version to checkout.
@@ -85,6 +88,19 @@ Update the following variables specific to OCP.
  * `pull_secret_file` : (Optional) Location of the OCP pull-secret file to be used. Default path is 'data/pull-secret.txt'.
  * `dns_forwarders` : (Optional) External DNS servers to forward DNS queries that cannot resolve locally. Eg: `"8.8.8.8; 9.9.9.9"`.
  * `mount_etcd_ramdisk` : (Optional) Flag for mounting etcd directory in the ramdisk. Note that the data will not be persistent.
+ * `rhcos_kernel_options` : (Optional) List of [kernel arguments](https://docs.openshift.com/container-platform/4.4/nodes/nodes/nodes-nodes-working.html#nodes-nodes-kernel-arguments_nodes-nodes-working) for the cluster nodes eg: ["slub_max_order=0","loglevel=7"]. Note that this will be applied after the cluster is installed, hence wait till all the nodes are in `Ready` status before you start using the cluster. Check nodes status using the command `oc get nodes`.
+ * `sysctl_tuned_options` : (Optional) Set to true to apply sysctl options via tuned operator. For more information check [Using the Node Tuning Operator](https://docs.openshift.com/container-platform/4.3/scalability_and_performance/using-node-tuning-operator.html) & [Using the Red Hat OpenShift Node Tuning Operator to set kernel parameters](https://www.ibm.com/support/producthub/icpdata/docs/content/SSQNUZ_current/cpd/svc/dbs/db2wh-nodetuningop.html)
+ * `sysctl_options` : (Required when `sysctl_tuned_options = true`) List of sysctl options to apply.
+ * `match_array` : (Required when `sysctl_tuned_options = true`) Multi-line config with node/pod selection criteria. Set of supported keys for each criteria: label, value & type.
+ * `proxy` : (Optional) Map of below parameters for using a proxy server to setup OCP on a private network.
+    * `server` : Proxy server hostname or IP.
+    * `port` : Proxy port to use (default is 3128).
+    * `user` : Proxy server user for authentication.
+    * `password` : Proxy server password for authentication.
+* `chrony_config` : (Optional) Set to true to configure chrony (NTP) client on the CoreOS node.
+* `chrony_config_servers` : (Required when `chrony_config = true`) List of ntp server and options.
+    * `server` : NTP server hostname or ip to sync with
+    * `options`: chrony options to use for sync (ex: `iburst`)
 
 ### Setup Storage Variables
 
@@ -93,6 +109,14 @@ Update the following variables specific to OCP storage. Note that currently only
  * `storage_type` : (Optional) Storage provisioner to configure. Supported values: nfs (For now only nfs provisioner is supported, any other value won't setup a storageclass)
  * `volume_size` : (Optional) If storage_type is nfs, a volume will be created with given size (default 300) in GB and attached to bastion node. Eg: 1000 for 1TB disk.
  * `volume_storage_template` : (Optional) Storage template name or ID for creating the volume. Empty value will use default template.
+ 
+### Setup Local Registry Variables
+
+Update the following variables specific to OCP local registry. Note that this is required only for restricted network install.
+
+ * `enable_local_registry` : (Optional) Set to true to enable usage of local registry for restricted network install.
+ * `local_registry_image` : (Optional) This is the name of the image used for creating the local registry container.
+ * `ocp_release_tag` : (Optional) The version of OpenShift you want to sync. Determine the tag by referring the [Repository Tags](https://quay.io/repository/openshift-release-dev/ocp-release?tab=tags) page.
 
 ### Setup OCP Upgrade Variables
 

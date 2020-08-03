@@ -60,6 +60,9 @@ variable "helpernode_repo" {}
 variable "helpernode_tag" {}
 variable "install_playbook_repo" {}
 variable "install_playbook_tag" {}
+variable "enable_local_registry" {}
+variable "local_registry_image" {}
+variable "ocp_release_tag" {}
 
 variable "storage_type" {}
 variable "log_level" {}
@@ -67,7 +70,14 @@ variable "log_level" {}
 variable "ansible_extra_options" {}
 variable "rhcos_kernel_options" {}
 
+variable "sysctl_tuned_options" {}
+variable "sysctl_options" {}
+variable "chrony_config" { default = false }
+variable "chrony_config_servers" {}
+variable "match_array" {}
+
+variable proxy {}
+
 variable "upgrade_image" {}
 variable "upgrade_pause_time" {}
 variable "upgrade_delay_time" {}
-

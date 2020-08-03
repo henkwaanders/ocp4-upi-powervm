@@ -19,6 +19,13 @@
 ################################################################
 
 locals {
+    local_registry  = {
+        enable_local_registry   = var.enable_local_registry
+        registry_image          = var.local_registry_image
+        ocp_release_repo        = "ocp4/openshift4"
+        ocp_release_tag         = var.ocp_release_tag
+    }
+
     helpernode_vars = {
         cluster_domain  = var.cluster_domain
         cluster_id      = var.cluster_id
@@ -55,6 +62,7 @@ locals {
         raw_image        = var.raw_image
         kernel_image     = var.kernel_image
         initramfs_image  = var.initramfs_image
+        local_registry   = local.local_registry
     }
 
     inventory = {
@@ -64,6 +72,14 @@ locals {
         worker_ips      = var.worker_ips
     }
 
+    proxy = {
+        server      = lookup(var.proxy, "server", ""),
+        port        = lookup(var.proxy, "port", "3128"),
+        user_pass   = lookup(var.proxy, "user", "") == "" ? "" : "${lookup(var.proxy, "user", "")}:${lookup(var.proxy, "password", "")}@"
+    }
+
+    local_registry_ocp_image = "registry.${var.cluster_id}.${var.cluster_domain}:5000/${local.local_registry.ocp_release_repo}:${var.ocp_release_tag}"
+
     install_vars = {
         cluster_id              = var.cluster_id
         cluster_domain          = var.cluster_domain
@@ -72,8 +88,16 @@ locals {
         public_ssh_key          = var.public_key
         storage_type            = var.storage_type
         log_level               = var.log_level
-        release_image_override  = var.release_image_override
+        release_image_override  = var.enable_local_registry ? "${local.local_registry_ocp_image}" : var.release_image_override
+        enable_local_registry   = var.enable_local_registry
         rhcos_kernel_options    = var.rhcos_kernel_options
+        sysctl_tuned_options    = var.sysctl_tuned_options
+        sysctl_options          = var.sysctl_options
+        chrony_config           = var.chrony_config
+        chrony_config_servers   = var.chrony_config_servers
+        match_array             = indent(2,var.match_array)
+        proxy_url               = local.proxy.server == "" ? "" : "http://${local.proxy.user_pass}${local.proxy.server}:${local.proxy.port}"
+        no_proxy                = var.cidr
     }
 
     upgrade_vars = {
@@ -95,11 +119,16 @@ resource "null_resource" "config" {
 
     provisioner "remote-exec" {
         inline = [
+            "mkdir -p .openshift",
             "rm -rf ocp4-helpernode",
             "echo 'Cloning into ocp4-helpernode...'",
             "git clone ${var.helpernode_repo} --quiet",
             "cd ocp4-helpernode && git checkout ${var.helpernode_tag}"
         ]
+    }
+    provisioner "file" {
+        source      = "data/pull-secret.txt"
+        destination = "~/.openshift/pull-secret"
     }
     provisioner "file" {
         content     = templatefile("${path.module}/templates/helpernode_vars.yaml", local.helpernode_vars)
@@ -155,6 +184,7 @@ resource "null_resource" "install" {
 
 resource "null_resource" "upgrade" {
     depends_on = [null_resource.install]
+    count      = var.upgrade_image != "" ? 1 : 0
 
     connection {
         type        = "ssh"

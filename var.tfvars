@@ -39,17 +39,42 @@ pull_secret_file = "data/pull-secret.txt"
 cluster_domain = "example.com"
 cluster_id_prefix = "test"
 service_network = "172.20.0.0/16"
+cluster_id        = ""
+
+### Local registry variables
+enable_local_registry = false  #Set to true to enable usage of the local registry for restricted network install.
+
+#local_registry_image = "docker.io/ibmcom/registry-ppc64le:2.6.2.5"
+#ocp_release_tag      = "4.4.9-ppc64le"
 
 dns_forwarders      = "8.8.8.8"
 mount_etcd_ramdisk  = false
 installer_log_level = "info"
 ansible_extra_options = "-v"
+rhcos_kernel_options  = []
+sysctl_tuned_options  = false
+#sysctl_options = ["kernel.shmmni = 16384", "net.ipv4.tcp_tw_reuse = 1"]
+#match_array = <<EOF
+#- label: node-role.kubernetes.io/master
+#- label: icp4data
+#  value: database-db2oltp
+#  type: pod
+#- label: disk
+#  value: ssd
+#EOF
+chrony_config = false
+#chrony_config_servers = [ {server = "0.centos.pool.ntp.org", options = "iburst"}, {server = "1.centos.pool.ntp.org", options = "iburst"} ]
 
 # If you forked/branched one of these repos change it here
 #helpernode_repo = "https://github.com/RedHatOfficial/ocp4-helpernode"
 #helpernode_tag = "master"
 #install_playbook_repo = "https://github.com/ocp-power-automation/ocp4-playbooks"
 #install_playbook_tag = "master"
+
+## Uncomment any one of the below formats to use proxy. Default 'port' will be 3128 if not specified. Not authenticated if 'user' is not specified.
+#proxy = {}
+#proxy = {server = "hostname_or_ip"}
+#proxy = {server = "hostname_or_ip", port = "3128", user = "pxuser", password = "pxpassword"}
 
 storage_type    = "nfs"
 volume_size = "300" # Value in GB
@@ -58,4 +83,3 @@ volume_storage_template = ""
 #upgrade_image = ""
 #upgrade_pause_time = "90"
 #upgrade_delay_time = "600"
-

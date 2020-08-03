@@ -145,15 +145,54 @@ variable "public_key" {
     default     = ""
 }
 
-variable "rhel_subscription_username" {}
+variable "rhel_subscription_username" {
+    default = ""
+}
 
-variable "rhel_subscription_password" {}
+variable "rhel_subscription_password" {
+    default = ""
+}
 
 variable "ansible_repo" {}
 
 variable "rhcos_kernel_options" {
     description = "List of kernel arguments for the cluster nodes"
     default     = []
+}
+
+variable "sysctl_tuned_options" {
+    description = "Set to true to apply sysctl options via tuned operator. Default: false"
+    default     = false
+}
+
+variable "sysctl_options" {
+    description = "List of sysctl options to apply."
+    default     = []
+}
+
+variable "match_array" {
+    description = "Criteria for node/pod selection."
+    default     = <<EOF
+EOF
+}
+
+variable "chrony_config" {
+    description = "Set to true to setup time synchronization and setup chrony. Default: false"
+    default     = false
+}
+
+variable "chrony_config_servers" {
+    description = "List of ntp servers and options to apply"
+    default     = [
+        {
+            server = "0.centos.pool.ntp.org",
+            options = "iburst"
+        }, 
+        {
+            server = "1.centos.pool.ntp.org", 
+            options = "iburst"
+        } 
+    ]
 }
 
 ################################################################
@@ -244,6 +283,11 @@ variable "cluster_domain" {
 variable "cluster_id_prefix" {
     default   = "test-ocp"
 }
+# Must consist of lower case alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character
+# Length cannot exceed 14 characters when combined with cluster_id_prefix
+variable "cluster_id" {
+    default   = ""
+}
 
 variable "service_network" {
     default   = "172.30.0.0/16"
@@ -256,6 +300,17 @@ variable "dns_forwarders" {
 variable "mount_etcd_ramdisk" {
     description = "Whether mount etcd directory in the ramdisk (Only for dev/test) on low performance disk"
     default     = false
+}
+
+variable proxy {
+    description = "Proxy server details in a map of server, port(default=3128), user & password"
+    default = {}
+#    default = {
+#        server = "10.10.1.166",
+#        port = "3128"
+#        user = "pxuser",
+#        password = "pxpassword"
+#    }
 }
 
 variable "storage_type" {
@@ -289,3 +344,21 @@ variable "upgrade_delay_time" {
     default = "600"
 }
 
+################################################################
+# Local registry variables ( used only in disconnected install )
+################################################################
+variable "enable_local_registry" {
+  description = "Set to true to enable usage of local registry for restricted network install."
+  type = bool
+  default = false
+}
+
+variable "local_registry_image" {
+    description = "Name of the image used for creating the local registry container."
+    default = "docker.io/ibmcom/registry-ppc64le:2.6.2.5"
+}
+
+variable "ocp_release_tag" {
+    description = "The version of OpenShift you want to sync."
+    default = "4.4.9-ppc64le"
+}
