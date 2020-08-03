@@ -117,6 +117,7 @@ module "install" {
     raw_image                       = var.raw_image
     kernel_image                    = var.kernel_image
     initramfs_image                 = var.initramfs_image
+    helm_source_image               = var.helm_source_image
     storage_type                    = var.storage_type
     release_image_override          = var.release_image_override
     helpernode_repo                 = var.helpernode_repo

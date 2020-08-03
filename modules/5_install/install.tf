@@ -62,6 +62,7 @@ locals {
         raw_image        = var.raw_image
         kernel_image     = var.kernel_image
         initramfs_image  = var.initramfs_image
+        helm_source_image = var.helm_source_image
         local_registry   = local.local_registry
     }
 

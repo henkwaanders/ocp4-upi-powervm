@@ -50,6 +50,7 @@ variable "openshift_install_tarball" {}
 variable "raw_image" {}
 variable "kernel_image" {}
 variable "initramfs_image" {}
+variable "helm_source_image" {}
 
 variable "service_network" {}
 variable "public_key" {}

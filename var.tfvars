@@ -31,7 +31,6 @@ openshift_client_tarball    = "https://mirror.openshift.com/pub/openshift-v4/ppc
 raw_image = "https://mirror.openshift.com/pub/openshift-v4/ppc64le/dependencies/rhcos/4.3/4.3.18/rhcos-4.3.18-metal.ppc64le.raw.gz"
 kernel_image = "https://mirror.openshift.com/pub/openshift-v4/ppc64le/dependencies/rhcos/4.3/4.3.18/rhcos-4.3.18-installer-kernel-ppc64le"
 initramfs_image = "https://mirror.openshift.com/pub/openshift-v4/ppc64le/dependencies/rhcos/4.3/4.3.18/rhcos-4.3.18-installer-initramfs.ppc64le.img"
-
 release_image_override = ""
 
 pull_secret_file = "data/pull-secret.txt"

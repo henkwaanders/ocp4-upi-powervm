@@ -267,6 +267,10 @@ variable "initramfs_image" {
      default = "https://mirror.openshift.com/pub/openshift-v4/ppc64le/dependencies/rhcos/4.4/latest/rhcos-4.4.9-ppc64le-installer-initramfs.ppc64le.img"
 }
 
+variable "helm_source_image" {
+     default = "https://get.helm.sh/helm-v3.2.4-linux-ppc64le.tar.gz"
+}
+
 variable "release_image_override" {
     default = ""
 }
