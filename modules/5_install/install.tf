@@ -68,9 +68,22 @@ locals {
 
     inventory = {
         bastion_ip      = var.bastion_ip
-        bootstrap_ip    = var.bootstrap_ip
-        master_ips      = var.master_ips
-        worker_ips      = var.worker_ips
+        bootstrap_info  = {
+            ip = var.bootstrap_ip,
+            name = "bootstrap"
+        }
+        master_info     = [ for ix in range(length(var.master_ips)) :
+            {
+                ip = var.master_ips[ix],
+                name = "master-${ix}"
+            }
+        ]
+        worker_info     = [ for ix in range(length(var.worker_ips)) :
+            {
+                ip = var.worker_ips[ix],
+                name = "worker-${ix}"
+            }
+        ]
     }
 
     proxy = {
