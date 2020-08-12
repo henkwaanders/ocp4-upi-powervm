@@ -11,5 +11,5 @@ ${m.ip} host=${m.name} ansible_connection=ssh ansible_user=core
 
 [workers]
 %{ for w in worker_info ~}
-${w.ip} host=${w.name} ansible_connection=ssh ansible_user=core
+${w.ip} host=${w.name} ansible_connection=ssh ansible_user=core openshift_node_labels="{'SMT': '4'}"
 %{ endfor ~}
