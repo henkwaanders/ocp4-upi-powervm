@@ -4,11 +4,12 @@ localhost ansible_connection=local
 [bootstrap]
 ${bootstrap_info.ip} host=${bootstrap_info.name} ansible_connection=ssh ansible_user=core
 
+[masters]
 %{ for m in master_info ~}
 ${m.ip} host=${m.name} ansible_connection=ssh ansible_user=core
 %{ endfor ~}
 
-workers:
+[workers]
 %{ for w in worker_info ~}
 ${w.ip} host=${w.name} ansible_connection=ssh ansible_user=core
 %{ endfor ~}
