@@ -22,6 +22,12 @@ ansible_repo                = "ansible-2.9-for-rhel-8-ppc64le-rpms"
 bastion                     = {instance_type    = "medium", image_id     = "daa5d3f4-ab66-4b2d-9f3d-77bd61774419"}
 bootstrap                   = {instance_type    = "medium", image_id     = "468863e6-4b33-4e8b-b2c5-c9ef9e6eedf4",  "count"   = 1}
 master                      = {instance_type    = "medium", image_id     = "468863e6-4b33-4e8b-b2c5-c9ef9e6eedf4",  "count"   = 3}
+connection_timeout          = 45
+jump_host                   = ""
+
+bastion                     = {instance_type    = "medium", image_id     = "daa5d3f4-ab66-4b2d-9f3d-77bd61774419"}
+bootstrap                   = {instance_type    = "medium", image_id     = "468863e6-4b33-4e8b-b2c5-c9ef9e6eedf4",  "count"   = 1}
+master                      = {instance_type    = "medium",  image_id    = "468863e6-4b33-4e8b-b2c5-c9ef9e6eedf4",  "count"   = 3}
 worker                      = {instance_type    = "large",  image_id     = "468863e6-4b33-4e8b-b2c5-c9ef9e6eedf4",  "count"   = 2}
 
 
@@ -60,7 +66,7 @@ sysctl_tuned_options  = false
 #- label: disk
 #  value: ssd
 #EOF
-chrony_config = false
+chrony_config = true
 #chrony_config_servers = [ {server = "0.centos.pool.ntp.org", options = "iburst"}, {server = "1.centos.pool.ntp.org", options = "iburst"} ]
 
 # If you forked/branched one of these repos change it here
@@ -69,7 +75,11 @@ chrony_config = false
 #install_playbook_repo = "https://github.com/ocp-power-automation/ocp4-playbooks"
 #install_playbook_tag = "master"
 
-## Uncomment any one of the below formats to use proxy. Default 'port' will be 3128 if not specified. Not authenticated if 'user' is not specified.
+## Set up a squid proxy server on the bastion node.
+setup_squid_proxy       = false
+
+## N/A when `setup_squid_proxy = true`, set `setup_squid_proxy = false` when using external proxy.
+## Uncomment any one of the below formats to use external proxy. Default 'port' will be 3128 if not specified. Not authenticated if 'user' is not specified.
 #proxy = {}
 #proxy = {server = "hostname_or_ip"}
 #proxy = {server = "hostname_or_ip", port = "3128", user = "pxuser", password = "pxpassword"}
@@ -78,6 +88,7 @@ storage_type    = "nfs"
 volume_size = "300" # Value in GB
 volume_storage_template = ""
 
-#upgrade_image = ""
+#upgrade_version = ""
+#upgrade_channel = ""  #(stable-4.x, fast-4.x, candidate-4.x) eg. stable-4.5
 #upgrade_pause_time = "90"
 #upgrade_delay_time = "600"

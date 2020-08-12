@@ -67,6 +67,8 @@ Update the following variables specific to the nodes.
  * `private_key_file` : (Optional) Corresponding private key file. Default path is 'data/id_rsa'.
  * `private_key` : (Optional) The contents of an SSH key to use for the connection. Ignored if `public_key_file` is provided.
  * `public_key` : (Optional) The contents of corresponding key to use for the connection. Ignored if `public_key_file` is provided.
+ * `connection_timeout` : (Optional) Timeout in minutes for SSH connections. Default is 45 minutes.
+ * `jump_host` : (Optional) Jump server hostname/IP to be used for SSH connections. Setup password-less SSH access to the jump_host from the Terraform terminal.
 
 ### Setup OpenShift Variables
 
@@ -74,7 +76,7 @@ Update the following variables specific to OCP.
 
  * `openshift_install_tarball` : (Required) HTTP URL for OpenShift install tarball.
  * `openshift_client_tarball` : (Required) HTTP URL for OpenShift client (`oc`) tarball.
- * `cluster_domain` : (Required) Cluster domain name. `<cluster_id>.<cluster_domain>` forms the fully qualified domain name.
+ * `cluster_domain` : (Required) Cluster domain name. `<cluster_id>.<cluster_domain>` forms the fully qualified domain name. Can also provide one of the online wildcard DNS domains: nip.io, xip.io & sslip.io.
  * `cluster_id_prefix` : (Required) Cluster identifier prefix. Should not be more than 8 characters. Nodes are pre-fixed with this value, please keep it unique.
  * `cluster_id` : (Optional) Cluster identifier, when not set random value will be used. Length cannot exceed 14 characters when combined with cluster_id_prefix.
  * `release_image_override` : (Optional) This is set to OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE while creating ignition files. Not applicable when using local registry setup.
@@ -92,13 +94,14 @@ Update the following variables specific to OCP.
  * `sysctl_tuned_options` : (Optional) Set to true to apply sysctl options via tuned operator. For more information check [Using the Node Tuning Operator](https://docs.openshift.com/container-platform/4.3/scalability_and_performance/using-node-tuning-operator.html) & [Using the Red Hat OpenShift Node Tuning Operator to set kernel parameters](https://www.ibm.com/support/producthub/icpdata/docs/content/SSQNUZ_current/cpd/svc/dbs/db2wh-nodetuningop.html)
  * `sysctl_options` : (Required when `sysctl_tuned_options = true`) List of sysctl options to apply.
  * `match_array` : (Required when `sysctl_tuned_options = true`) Multi-line config with node/pod selection criteria. Set of supported keys for each criteria: label, value & type.
- * `proxy` : (Optional) Map of below parameters for using a proxy server to setup OCP on a private network.
+ * `setup_squid_proxy` : (Optional) Flag to setup Squid proxy server on bastion node. Default value is false.
+ * `proxy` : (Optional) Map of below parameters for using external proxy server to setup OCP on a private network. Ensure `setup_squid_proxy = false` when you want to use this.
     * `server` : Proxy server hostname or IP.
     * `port` : Proxy port to use (default is 3128).
     * `user` : Proxy server user for authentication.
     * `password` : Proxy server password for authentication.
-* `chrony_config` : (Optional) Set to true to configure chrony (NTP) client on the CoreOS node.
-* `chrony_config_servers` : (Required when `chrony_config = true`) List of ntp server and options.
+ * `chrony_config` : (Optional) Set to true to configure chrony (NTP) client on the CoreOS node.
+ * `chrony_config_servers` : (Required when `chrony_config = true`) List of ntp server and options.
     * `server` : NTP server hostname or ip to sync with
     * `options`: chrony options to use for sync (ex: `iburst`)
 
@@ -122,7 +125,8 @@ Update the following variables specific to OCP local registry. Note that this is
 
 Update the following variables specific to OCP upgrade. The upgrade will be performed after a successful install of OCP.
 
- * `upgrade_image` : (Optional) OpenShift release image having higher and supported version. If set, OCP cluster will be upgraded to this image version. (e.g. `"quay.io/openshift-release-dev/ocp-release-nightly@sha256:552ed19a988fff336712a50..."`)
+ * `upgrade_version` : (Optional) OpenShift higher and supported version. If set, OCP cluster will be upgraded to this version. (e.g. `"4.5.4"`)
+ * `upgrade_channel` : (Optional) OpenShift channel having required upgrade version available for cluster upgrade. By default it is automatically set to stable channel of installed cluster (eg: stable-4.5). See [Understanding Upgrade Channels](https://docs.openshift.com/container-platform/4.5/updating/updating-cluster-between-minor.html#understanding-upgrade-channels_updating-cluster-between-minor) for more information on setting the upgrade channel.
  * `upgrade_pause_time` : (Optional) Minutes to pause the playbook execution before starting to check the upgrade status once the upgrade command is executed.
  * `upgrade_delay_time` : (Optional) Seconds to wait before re-checking the upgrade status once the playbook execution resumes.
 
@@ -166,7 +170,11 @@ Once the deployment is completed successfully, you can safely delete the bootstr
 
 
 ### Create API and Ingress DNS Records
-You will also need to add the following records to your DNS server:
+
+Please skip this section if your `domain_name` is one of the online wildcard DNS domains: nip.io, xip.io & sslip.io.
+
+Add the following records to your DNS server:
+
 ```
 api.<cluster name>.<cluster domain>.  IN  A  <Bastion IP>
 *.apps.<cluster name>.<cluster domain>.  IN  A  <Bastion IP>

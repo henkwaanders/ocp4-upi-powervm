@@ -178,21 +178,13 @@ EOF
 
 variable "chrony_config" {
     description = "Set to true to setup time synchronization and setup chrony. Default: false"
-    default     = false
+    default     = true
 }
 
 variable "chrony_config_servers" {
     description = "List of ntp servers and options to apply"
-    default     = [
-        {
-            server = "0.centos.pool.ntp.org",
-            options = "iburst"
-        }, 
-        {
-            server = "1.centos.pool.ntp.org", 
-            options = "iburst"
-        } 
-    ]
+    default     = []
+    # example: chrony_config_servers = [ {server = "10.3.21.254", options = "iburst"}, {server = "10.5.21.254", options = "iburst"} ]
 }
 
 ################################################################
@@ -201,6 +193,16 @@ variable "chrony_config_servers" {
 variable "ssh_agent" {
     description = "Enable or disable SSH Agent. Can correct some connectivity issues. Default: false"
     default     = false
+}
+
+variable "connection_timeout" {
+    description = "Timeout in minutes for SSH connections"
+    default     = 45
+}
+
+variable "jump_host" {
+    description = "Jump server hostname/IP to be used for SSH connections"
+    default     = ""
 }
 
 variable "installer_log_level" {
@@ -248,11 +250,11 @@ locals {
 ### OpenShift variables
 ################################################################
 variable "openshift_install_tarball" {
-    default = "https://mirror.openshift.com/pub/openshift-v4/ppc64le/clients/ocp/stable-4.4/openshift-install-linux.tar.gz"
+    default = "https://mirror.openshift.com/pub/openshift-v4/ppc64le/clients/ocp/4.5.4/openshift-install-linux.tar.gz"
 }
 
 variable "openshift_client_tarball" {
-     default = "https://mirror.openshift.com/pub/openshift-v4/ppc64le/clients/ocp/stable-4.4/openshift-client-linux.tar.gz"
+     default = "https://mirror.openshift.com/pub/openshift-v4/ppc64le/clients/ocp/4.5.4/openshift-client-linux.tar.gz"
 }
 
 variable "raw_image" {
@@ -306,8 +308,14 @@ variable "mount_etcd_ramdisk" {
     default     = false
 }
 
+variable "setup_squid_proxy" {
+    description = "Flag to install and configure squid proxy server on bastion node"
+    default     = false
+}
+
+# Applicable only when `setup_squid_proxy = false`
 variable proxy {
-    description = "Proxy server details in a map of server, port(default=3128), user & password"
+    description = "External proxy server details in a map of server, port(default=3128), user & password"
     default = {}
 #    default = {
 #        server = "10.10.1.166",
@@ -333,8 +341,13 @@ variable "volume_storage_template" {
     default = ""
 }
 
-variable "upgrade_image" {
-    description = "OCP upgrade image"
+variable "upgrade_version" {
+    description = "OCP upgrade version eg. 4.5.4"
+    default = ""
+}
+
+variable "upgrade_channel" {
+    description = "Upgrade channel having required version availble for cluster upgrade (stable-4.x, fast-4.x, candidate-4.x) eg. stable-4.5"
     default = ""
 }
 

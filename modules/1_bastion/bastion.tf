@@ -99,7 +99,8 @@ resource "openstack_compute_instance_v2" "bastion" {
             host        = self.access_ip_v4
             private_key = var.private_key
             agent       = var.ssh_agent
-            timeout     = "15m"
+            timeout     = "${var.connection_timeout}m"
+            bastion_host = var.jump_host
         }
 
         when        = destroy
@@ -129,7 +130,8 @@ resource "null_resource" "bastion_init" {
         host        = openstack_compute_instance_v2.bastion.access_ip_v4
         private_key = var.private_key
         agent       = var.ssh_agent
-        timeout     = "15m"
+        timeout     = "${var.connection_timeout}m"
+        bastion_host = var.jump_host
     }
     provisioner "remote-exec" {
         inline = [
@@ -163,15 +165,16 @@ resource "null_resource" "bastion_init" {
 }
 
 resource "null_resource" "setup_proxy_info" {
-    depends_on = [null_resource.bastion_init]
-    count       = local.proxy.server != "" ? 1 : 0
+    depends_on  = [null_resource.bastion_init]
+    count       = !var.setup_squid_proxy && local.proxy.server != "" ? 1 : 0
     connection {
         type        = "ssh"
         user        = var.rhel_username
         host        = openstack_compute_instance_v2.bastion.access_ip_v4
         private_key = var.private_key
         agent       = var.ssh_agent
-        timeout     = "15m"
+        timeout     = "${var.connection_timeout}m"
+        bastion_host = var.jump_host
     }
     # Setup proxy
     provisioner "remote-exec" {
@@ -216,7 +219,8 @@ resource "null_resource" "bastion_register" {
         host        = openstack_compute_instance_v2.bastion.access_ip_v4
         private_key = var.private_key
         agent       = var.ssh_agent
-        timeout     = "15m"
+        timeout     = "${var.connection_timeout}m"
+        bastion_host = var.jump_host
     }
     provisioner "remote-exec" {
         inline = [
@@ -245,7 +249,8 @@ resource "null_resource" "bastion_packages" {
         host        = openstack_compute_instance_v2.bastion.access_ip_v4
         private_key = var.private_key
         agent       = var.ssh_agent
-        timeout     = "15m"
+        timeout     = "${var.connection_timeout}m"
+        bastion_host = var.jump_host
     }
     provisioner "remote-exec" {
         inline = [
@@ -311,7 +316,8 @@ resource "null_resource" "setup_nfs_disk" {
         host        = openstack_compute_instance_v2.bastion.access_ip_v4
         private_key = var.private_key
         agent       = var.ssh_agent
-        timeout     = "15m"
+        timeout     = "${var.connection_timeout}m"
+        bastion_host = var.jump_host
     }
     provisioner "file" {
         content     = templatefile("${path.module}/templates/create_disk_link.sh", local.disk_config)

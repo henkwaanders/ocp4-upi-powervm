@@ -19,6 +19,8 @@
 ################################################################
 
 locals {
+    cluster_domain  = var.cluster_domain == "nip.io" || var.cluster_domain == "xip.io" || var.cluster_domain == "sslip.io" ? "${var.bastion_ip}.${var.cluster_domain}" : var.cluster_domain
+
     local_registry  = {
         enable_local_registry   = var.enable_local_registry
         registry_image          = var.local_registry_image
@@ -27,7 +29,7 @@ locals {
     }
 
     helpernode_vars = {
-        cluster_domain  = var.cluster_domain
+        cluster_domain  = local.cluster_domain
         cluster_id      = var.cluster_id
         bastion_ip      = var.bastion_ip
         forwarders      = var.dns_forwarders
@@ -36,6 +38,8 @@ locals {
         broadcast       = cidrhost(var.cidr,-1)
         ipid            = cidrhost(var.cidr, 0)
         pool            = var.allocation_pools[0]
+        chrony_config           = var.chrony_config
+        chrony_config_servers   = var.chrony_config_servers
 
         bootstrap_info  = {
             ip = var.bootstrap_ip,
@@ -92,11 +96,11 @@ locals {
         user_pass   = lookup(var.proxy, "user", "") == "" ? "" : "${lookup(var.proxy, "user", "")}:${lookup(var.proxy, "password", "")}@"
     }
 
-    local_registry_ocp_image = "registry.${var.cluster_id}.${var.cluster_domain}:5000/${local.local_registry.ocp_release_repo}:${var.ocp_release_tag}"
+    local_registry_ocp_image = "registry.${var.cluster_id}.${local.cluster_domain}:5000/${local.local_registry.ocp_release_repo}:${var.ocp_release_tag}"
 
     install_vars = {
         cluster_id              = var.cluster_id
-        cluster_domain          = var.cluster_domain
+        cluster_domain          = local.cluster_domain
         service_network         = var.service_network
         pull_secret             = var.pull_secret
         public_ssh_key          = var.public_key
@@ -104,18 +108,23 @@ locals {
         log_level               = var.log_level
         release_image_override  = var.enable_local_registry ? "${local.local_registry_ocp_image}" : var.release_image_override
         enable_local_registry   = var.enable_local_registry
+        node_connection_timeout = "${60 * var.connection_timeout}"
         rhcos_kernel_options    = var.rhcos_kernel_options
         sysctl_tuned_options    = var.sysctl_tuned_options
         sysctl_options          = var.sysctl_options
-        chrony_config           = var.chrony_config
-        chrony_config_servers   = var.chrony_config_servers
         match_array             = indent(2,var.match_array)
+        setup_squid_proxy       = var.setup_squid_proxy
+        squid_source_range      = var.cidr
         proxy_url               = local.proxy.server == "" ? "" : "http://${local.proxy.user_pass}${local.proxy.server}:${local.proxy.port}"
         no_proxy                = var.cidr
+        chrony_config           = var.chrony_config
+        chrony_config_servers   = var.chrony_config_servers
+        chrony_allow_range      = var.cidr
     }
 
     upgrade_vars = {
-        upgrade_image   = var.upgrade_image
+        upgrade_version = var.upgrade_version
+        upgrade_channel = var.upgrade_channel
         pause_time      = var.upgrade_pause_time
         delay_time      = var.upgrade_delay_time
     }
@@ -128,7 +137,8 @@ resource "null_resource" "config" {
         host        = var.bastion_ip
         private_key = var.private_key
         agent       = var.ssh_agent
-        timeout     = "15m"
+        timeout     = "${var.connection_timeout}m"
+        bastion_host = var.jump_host
     }
 
     provisioner "remote-exec" {
@@ -165,7 +175,8 @@ resource "null_resource" "install" {
         host        = var.bastion_ip
         private_key = var.private_key
         agent       = var.ssh_agent
-        timeout     = "15m"
+        timeout     = "${var.connection_timeout}m"
+        bastion_host = var.jump_host
     }
 
     provisioner "remote-exec" {
@@ -198,7 +209,7 @@ resource "null_resource" "install" {
 
 resource "null_resource" "upgrade" {
     depends_on = [null_resource.install]
-    count      = var.upgrade_image != "" ? 1 : 0
+    count      = var.upgrade_version != "" ? 1 : 0
 
     connection {
         type        = "ssh"
@@ -206,7 +217,8 @@ resource "null_resource" "upgrade" {
         host        = var.bastion_ip
         private_key = var.private_key
         agent       = var.ssh_agent
-        timeout     = "15m"
+        timeout     = "${var.connection_timeout}m"
+        bastion_host = var.jump_host
     }
 
     provisioner "file" {

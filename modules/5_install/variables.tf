@@ -36,6 +36,8 @@ variable "bastion_ip" {}
 variable "rhel_username" {}
 variable "private_key" {}
 variable "ssh_agent" {}
+variable "connection_timeout" {}
+variable "jump_host" {}
 
 variable "bootstrap_ip" {}
 variable "master_ips" {}
@@ -73,12 +75,14 @@ variable "rhcos_kernel_options" {}
 
 variable "sysctl_tuned_options" {}
 variable "sysctl_options" {}
-variable "chrony_config" { default = false }
-variable "chrony_config_servers" {}
 variable "match_array" {}
+variable "chrony_config" { default = true }
+variable "chrony_config_servers" {}
 
-variable proxy {}
+variable "setup_squid_proxy" {}
+variable "proxy" {}
 
-variable "upgrade_image" {}
+variable "upgrade_version" {}
+variable "upgrade_channel" {}
 variable "upgrade_pause_time" {}
 variable "upgrade_delay_time" {}

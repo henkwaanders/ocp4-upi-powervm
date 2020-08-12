@@ -42,6 +42,8 @@ variable "public_key" {}
 variable "create_keypair" {}
 variable "keypair_name" {}
 variable "ssh_agent" {}
+variable "connection_timeout" {}
+variable "jump_host" {}
 
 variable "rhel_subscription_username" {}
 variable "rhel_subscription_password" {}
@@ -51,4 +53,5 @@ variable "storage_type" {}
 variable "volume_size" {}
 variable "volume_storage_template" {}
 
+variable "setup_squid_proxy" {}
 variable "proxy" {}

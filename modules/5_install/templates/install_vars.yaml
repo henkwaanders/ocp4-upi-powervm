@@ -12,6 +12,8 @@ log_level: ${log_level}
 release_image_override: '${release_image_override}'
 enable_local_registry: ${enable_local_registry}
 
+node_connection_timeout: ${node_connection_timeout}
+
 rhcos_kernel_options: [%{ for opt in rhcos_kernel_options ~}"${opt}",%{ endfor ~}]
 
 sysctl_tuned_options: ${sysctl_tuned_options}
@@ -27,12 +29,20 @@ match_array:
 %{ if chrony_config ~}
 chronyconfig:
   enabled: true
+  allow:
+    - ${chrony_allow_range}
+%{ if chrony_config_servers != [] ~}
   content:
+%{ endif ~}
 %{ for item in chrony_config_servers ~}
     - server: ${item.server}
       options: ${item.options}
 %{ endfor ~}
-%{endif ~}
+%{ endif ~}
+
+setup_squid_proxy : ${setup_squid_proxy}
+squid_acl_localnet:
+  - acl localnet src ${squid_source_range}
 
 proxy_url: "${proxy_url}"
 no_proxy: "${no_proxy}"
