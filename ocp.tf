@@ -129,6 +129,7 @@ module "install" {
     enable_local_registry           = var.enable_local_registry
     local_registry_image            = var.local_registry_image
     ocp_release_tag                 = var.ocp_release_tag
+    helpernode_repo                 = var.helpernode_repo
     helpernode_tag                  = var.helpernode_tag
     install_playbook_repo           = var.install_playbook_repo
     install_playbook_tag            = var.install_playbook_tag

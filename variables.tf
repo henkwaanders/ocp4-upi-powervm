@@ -211,7 +211,8 @@ variable "installer_log_level" {
 }
 
 variable "helpernode_repo" {
-    description = "Set the ocp4-helpernode url"
+    description = "Set the repo URL for using ocp4-helpernode"
+    # Repo for running ocp4 helpernode setup steps.
     default = "https://github.com/RedHatOfficial/ocp4-helpernode"
 }
 
@@ -223,6 +224,12 @@ variable "helpernode_tag" {
 
 variable "install_playbook_repo" {
     description = "Set ocp4-playbooks url"
+    default = "https://github.com/ocp-power-automation/ocp4-playbooks"
+}
+
+variable "install_playbook_repo" {
+    description = "Set the repo URL for using ocp4-playbooks"
+    # Repo for running ocp4 installations steps.
     default = "https://github.com/ocp-power-automation/ocp4-playbooks"
 }
 

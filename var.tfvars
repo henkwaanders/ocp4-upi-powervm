@@ -69,11 +69,10 @@ sysctl_tuned_options  = false
 chrony_config = true
 #chrony_config_servers = [ {server = "0.centos.pool.ntp.org", options = "iburst"}, {server = "1.centos.pool.ntp.org", options = "iburst"} ]
 
-# If you forked/branched one of these repos change it here
-#helpernode_repo = "https://github.com/RedHatOfficial/ocp4-helpernode"
-#helpernode_tag = "master"
-#install_playbook_repo = "https://github.com/ocp-power-automation/ocp4-playbooks"
-#install_playbook_tag = "master"
+#helpernode_repo             = "https://github.com/RedHatOfficial/ocp4-helpernode"
+#helpernode_tag = ""
+#install_playbook_repo       = "https://github.com/ocp-power-automation/ocp4-playbooks"
+#install_playbook_tag = ""
 
 ## Set up a squid proxy server on the bastion node.
 setup_squid_proxy       = false
