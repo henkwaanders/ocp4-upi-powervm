@@ -18,15 +18,12 @@
 #
 ################################################################
 
-variable "cluster_domain" {
-  default   = "example.com"
+terraform {
+  required_providers {
+    null = {
+      source = "hashicorp/null"
+      version = "~> 2.1"
+    }
+  }
+  required_version = "~> 0.13.0"
 }
-variable "cluster_id" {
-  default   = "test-ocp"
-}
-
-variable "network_name" {}
-variable "master_count" {}
-variable "worker_count" {}
-
-variable "network_type" {}

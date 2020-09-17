@@ -25,19 +25,18 @@ resource "random_id" "label" {
 
 #bootstrap
 data "ignition_config" "bootstrap" {
-    append {
+    merge {
         source  = "http://${var.bastion_ip}:8080/ignition/bootstrap.ign"
     }
-    files       = [
-        data.ignition_file.b_hostname.rendered,
-    ]
+    files       = [data.ignition_file.b_hostname.rendered]
 }
 
 data "ignition_file" "b_hostname" {
-    filesystem  = "root"
+    overwrite   = true
     mode        = "420" // 0644
     path        = "/etc/hostname"
     content {
+        mime    = "text/plain"
         content = <<EOF
 bootstrap
 EOF
@@ -86,22 +85,21 @@ data "ignition_systemd_unit" "ramdisk" {
 
 data "ignition_config" "master" {
     count       = var.master["count"]
-    append {
+    merge {
         source  = "http://${var.bastion_ip}:8080/ignition/master.ign"
     }
-    files       = [
-        element(data.ignition_file.m_hostname.*.rendered, count.index),
-    ]
-    systemd     = var.mount_etcd_ramdisk ? data.ignition_systemd_unit.ramdisk.*.rendered : null
+    files       = [data.ignition_file.m_hostname[count.index].rendered]
+    systemd     = data.ignition_systemd_unit.ramdisk.*.rendered
 }
 
 data "ignition_file" "m_hostname" {
     count       = var.master["count"]
-    filesystem  = "root"
+    overwrite   = true
     mode        = "420" // 0644
     path        = "/etc/hostname"
     content {
-    content     = <<EOF
+        mime    = "text/plain"
+        content = <<EOF
 master-${count.index}
 EOF
     }
@@ -131,10 +129,7 @@ resource "openstack_compute_instance_v2" "master" {
     image_id    = var.master["image_id"]
     availability_zone   = var.openstack_availability_zone
 
-    user_data   = element(
-        data.ignition_config.master.*.rendered,
-        count.index,
-    )
+    user_data   = data.ignition_config.master[count.index].rendered
 
     network {
         port    = var.master_port_ids[count.index]
@@ -143,27 +138,26 @@ resource "openstack_compute_instance_v2" "master" {
 
 
 #worker
+data "ignition_config" "worker" {
+    count       = var.worker["count"]
+    merge {
+        source  = "http://${var.bastion_ip}:8080/ignition/worker.ign"
+    }
+    files       = [data.ignition_file.w_hostname[count.index].rendered]
+}
+
 data "ignition_file" "w_hostname" {
     count       = var.worker["count"]
-    filesystem  = "root"
+    overwrite   = true
     mode        = "420" // 0644
     path        = "/etc/hostname"
 
     content {
-    content     = <<EOF
+        mime    = "text/plain"
+        content = <<EOF
 worker-${count.index}
 EOF
     }
-}
-
-data "ignition_config" "worker" {
-    count       = var.worker["count"]
-    append {
-        source  = "http://${var.bastion_ip}:8080/ignition/worker.ign"
-    }
-    files       = [
-        element(data.ignition_file.w_hostname.*.rendered, count.index),
-    ]
 }
 
 resource "openstack_compute_flavor_v2" "worker_scg" {
@@ -190,10 +184,7 @@ resource "openstack_compute_instance_v2" "worker" {
     image_id    = var.worker["image_id"]
     availability_zone   = var.openstack_availability_zone
 
-    user_data = element(
-        data.ignition_config.worker.*.rendered,
-        count.index,
-    )
+    user_data = data.ignition_config.worker[count.index].rendered
 
     network {
         port = var.worker_port_ids[count.index]

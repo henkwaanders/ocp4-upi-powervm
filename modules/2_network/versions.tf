@@ -18,6 +18,12 @@
 #
 ################################################################
 
-output "bastion_ip" {
-    value = openstack_compute_instance_v2.bastion.access_ip_v4
+terraform {
+  required_providers {
+    openstack = {
+      source = "terraform-providers/openstack"
+      version = "~> 1.31"
+    }
+  }
+  required_version = "~> 0.13.0"
 }

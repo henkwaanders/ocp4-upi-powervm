@@ -67,9 +67,8 @@ module "bastion" {
 }
 
 module "network" {
-    source                          = "./modules/3_network"
+    source                          = "./modules/2_network"
 
-    cluster_domain                  = var.cluster_domain
     cluster_id                      = local.cluster_id
     network_name                    = var.network_name
     master_count                    = var.master["count"]
@@ -77,25 +76,9 @@ module "network" {
     network_type                    = var.network_type
 }
 
-module "nodes" {
-    source                          = "./modules/4_nodes"
-
-    bastion_ip                      = module.bastion.bastion_ip
-    cluster_domain                  = var.cluster_domain
-    cluster_id                      = local.cluster_id
-    bootstrap                       = var.bootstrap
-    master                          = var.master
-    worker                          = var.worker
-    scg_id                          = var.scg_id
-    openstack_availability_zone     = var.openstack_availability_zone
-    bootstrap_port_id               = module.network.bootstrap_port_id
-    master_port_ids                 = module.network.master_port_ids
-    worker_port_ids                 = module.network.worker_port_ids
-    mount_etcd_ramdisk              = var.mount_etcd_ramdisk
-}
-
-module "install" {
-    source                          = "./modules/5_install"
+module "helpernode" {
+    depends_on                      = [module.bastion]
+    source                          = "./modules/3_helpernode"
 
     cluster_domain                  = var.cluster_domain
     cluster_id                      = local.cluster_id
@@ -109,12 +92,57 @@ module "install" {
     ssh_agent                       = var.ssh_agent
     connection_timeout              = var.connection_timeout
     jump_host                       = var.jump_host
-    bootstrap_ip                    = module.nodes.bootstrap_ip
-    master_ips                      = module.nodes.master_ips
-    worker_ips                      = module.nodes.worker_ips
+    bootstrap_port_ip               = module.network.bootstrap_port_ip
+    master_port_ips                 = module.network.master_port_ips
+    worker_port_ips                 = module.network.worker_port_ips
     bootstrap_mac                   = module.network.bootstrap_mac
     master_macs                     = module.network.master_macs
     worker_macs                     = module.network.worker_macs
+    openshift_install_tarball       = var.openshift_install_tarball
+    openshift_client_tarball        = var.openshift_client_tarball
+    enable_local_registry           = var.enable_local_registry
+    local_registry_image            = var.local_registry_image
+    ocp_release_tag                 = var.ocp_release_tag
+    helpernode_repo                 = var.helpernode_repo
+    helpernode_tag                  = var.helpernode_tag
+    ansible_extra_options           = var.ansible_extra_options
+    chrony_config                   = var.chrony_config
+    chrony_config_servers           = var.chrony_config_servers
+}
+
+module "nodes" {
+    depends_on                      = [module.helpernode]
+    source                          = "./modules/4_nodes"
+
+    bastion_ip                      = module.bastion.bastion_ip
+    cluster_id                      = local.cluster_id
+    bootstrap                       = var.bootstrap
+    master                          = var.master
+    worker                          = var.worker
+    scg_id                          = var.scg_id
+    openstack_availability_zone     = var.openstack_availability_zone
+    bootstrap_port_id               = module.network.bootstrap_port_id
+    master_port_ids                 = module.network.master_port_ids
+    worker_port_ids                 = module.network.worker_port_ids
+    mount_etcd_ramdisk              = var.mount_etcd_ramdisk
+}
+
+module "install" {
+    depends_on                      = [module.nodes]
+    source                          = "./modules/5_install"
+
+    cluster_domain                  = var.cluster_domain
+    cluster_id                      = local.cluster_id
+    cidr                            = module.network.cidr
+    bastion_ip                      = module.bastion.bastion_ip
+    rhel_username                   = var.rhel_username
+    private_key                     = local.private_key
+    ssh_agent                       = var.ssh_agent
+    connection_timeout              = var.connection_timeout
+    jump_host                       = var.jump_host
+    bootstrap_ip                    = module.nodes.bootstrap_ip
+    master_ips                      = module.nodes.master_ips
+    worker_ips                      = module.nodes.worker_ips
     public_key                      = local.public_key
     pull_secret                     = file(coalesce(var.pull_secret_file, "/dev/null"))
     openshift_install_tarball       = var.openshift_install_tarball
@@ -129,8 +157,6 @@ module "install" {
     enable_local_registry           = var.enable_local_registry
     local_registry_image            = var.local_registry_image
     ocp_release_tag                 = var.ocp_release_tag
-    helpernode_repo                 = var.helpernode_repo
-    helpernode_tag                  = var.helpernode_tag
     install_playbook_repo           = var.install_playbook_repo
     install_playbook_tag            = var.install_playbook_tag
     log_level                       = var.installer_log_level

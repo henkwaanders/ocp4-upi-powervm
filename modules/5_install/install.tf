@@ -96,7 +96,7 @@ locals {
         user_pass   = lookup(var.proxy, "user", "") == "" ? "" : "${lookup(var.proxy, "user", "")}:${lookup(var.proxy, "password", "")}@"
     }
 
-    local_registry_ocp_image = "registry.${var.cluster_id}.${local.cluster_domain}:5000/${local.local_registry.ocp_release_repo}:${var.ocp_release_tag}"
+    local_registry_ocp_image = "registry.${var.cluster_id}.${local.cluster_domain}:5000/${local.ocp_release_repo}:${var.ocp_release_tag}"
 
     install_vars = {
         cluster_id              = var.cluster_id
@@ -130,45 +130,7 @@ locals {
     }
 }
 
-resource "null_resource" "config" {
-    connection {
-        type        = "ssh"
-        user        = var.rhel_username
-        host        = var.bastion_ip
-        private_key = var.private_key
-        agent       = var.ssh_agent
-        timeout     = "${var.connection_timeout}m"
-        bastion_host = var.jump_host
-    }
-
-    provisioner "remote-exec" {
-        inline = [
-            "mkdir -p .openshift",
-            "rm -rf ocp4-helpernode",
-            "echo 'Cloning into ocp4-helpernode...'",
-            "git clone ${var.helpernode_repo} --quiet",
-            "cd ocp4-helpernode && git checkout ${var.helpernode_tag}"
-        ]
-    }
-    provisioner "file" {
-        source      = "data/pull-secret.txt"
-        destination = "~/.openshift/pull-secret"
-    }
-    provisioner "file" {
-        content     = templatefile("${path.module}/templates/helpernode_vars.yaml", local.helpernode_vars)
-        destination = "~/ocp4-helpernode/helpernode_vars.yaml"
-    }
-    provisioner "remote-exec" {
-        inline = [
-            "echo 'Running ocp4-helpernode playbook...'",
-            "cd ocp4-helpernode && ansible-playbook -e @helpernode_vars.yaml tasks/main.yml ${var.ansible_extra_options}"
-        ]
-    }
-}
-
 resource "null_resource" "install" {
-    depends_on = [null_resource.config]
-
     connection {
         type        = "ssh"
         user        = var.rhel_username
@@ -189,11 +151,11 @@ resource "null_resource" "install" {
     }
     provisioner "file" {
         content     = templatefile("${path.module}/templates/inventory", local.inventory)
-        destination = "~/ocp4-playbooks/inventory"
+        destination = "$HOME/ocp4-playbooks/inventory"
     }
     provisioner "file" {
         content     = templatefile("${path.module}/templates/install_vars.yaml", local.install_vars)
-        destination = "~/ocp4-playbooks/install_vars.yaml"
+        destination = "$HOME/ocp4-playbooks/install_vars.yaml"
     }
     provisioner "file" {
         source      = "data/htpasswd"
@@ -223,7 +185,7 @@ resource "null_resource" "upgrade" {
 
     provisioner "file" {
         content     = templatefile("${path.module}/templates/upgrade_vars.yaml", local.upgrade_vars)
-        destination = "~/ocp4-playbooks/upgrade_vars.yaml"
+        destination = "$HOME/ocp4-playbooks/upgrade_vars.yaml"
     }
     provisioner "remote-exec" {
         inline = [

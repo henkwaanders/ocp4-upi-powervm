@@ -18,6 +18,10 @@
 #
 ################################################################
 
-output "bastion_ip" {
-    value = openstack_compute_instance_v2.bastion.access_ip_v4
-}
+variable "cluster_id" {}
+
+variable "network_name" {}
+variable "master_count" {}
+variable "worker_count" {}
+
+variable "network_type" {}
